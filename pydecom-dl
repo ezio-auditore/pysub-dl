@@ -5,7 +5,7 @@ import argparse
 import requests
 from BeautifulSoup import BeautifulSoup
 import sys
-import os.path
+import os
 import zipfile
 parser = argparse.ArgumentParser(description = 'Searches and downloads subtitle for your movie')
 parser.add_argument("movie", type = str,
@@ -36,6 +36,7 @@ def download_file(url):
     urllib.urlretrieve(url, "%s.zip" %args.movie)
     addr = os.getcwd()+'/'+str(args.movie)+".zip"
     decom(addr)
+    os.remove(addr)
     choice = raw_input('Was that appropriate? ')
     if 'y' in choice:
         sys.exit(0)
