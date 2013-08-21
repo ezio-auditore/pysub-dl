@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import urllib
+import argparse
+import requests
+from BeautifulSoup import BeautifulSoup
+import sys
+import os.path
+import zipfile
+parser = argparse.ArgumentParser(description = 'Searches and downloads subtitle for your movie')
+parser.add_argument("movie", type = str,
+                    help = "Path to file")
+parser.add_argument("language", type = str,
+                    help = "Subtitle language")
+args = parser.parse_args()
+
+def make_link(movie_name, lang):
+    return 'http://subscene.com/subtitles/%s/%s' %(movie_name, lang)
+
+def search_sub(link):
+    data = requests.get(link)
+    soup = BeautifulSoup(data.text)
+    for subs in soup.findAll('td', attrs={'class' : 'a1'}):
+        for link in subs.findAll('a'):
+            down_sub2('http://subscene.com' + link.get('href'))
+
+
+def down_sub2(link):
+    data = requests.get(link)
+    soup = BeautifulSoup(data.text)
+    for subs in soup.findAll('div', attrs={'class' : 'download'}):
+        for link in subs.findAll('a'):
+            download_file('http://subscene.com' + link.get('href'))
+
+def download_file(url):
+    urllib.urlretrieve(url, "%s.zip" %args.movie)
+    addr = os.getcwd()+'/'+str(args.movie)+".zip"
+    decom(addr)
+    choice = raw_input('Was that appropriate? ')
+    if 'y' in choice:
+        sys.exit(0)
+def decom(file):
+    zfile = zipfile.ZipFile(file)
+    zipfile.ZipFile.extractall(zfile,path=None,pwd=None)
+
+if __name__ == '__main__':
+    link = make_link(args.movie, args.language)
+    search_sub(link)
